@@ -172,3 +172,4 @@ export function dotsToLeave(id: GhostId, level: number): number {
 
 export const SAVE_KEY = "pacman.v1";
 export const SAVE_VERSION = 1;
+export const VERSION = "1.0.2";

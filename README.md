@@ -1,4 +1,4 @@
-# Pac-Man v1.0.1
+# Pac-Man v1.0.2
 
 Arcade maze chase from Playadda. Eat every pellet, grab the energizers, and stay ahead of four ghosts.
 
@@ -49,6 +49,9 @@ Use and modify freely for personal or commercial projects.
 
 
 ## Changelog
+
+### 1.0.2
+- Playadda UX: visible `v1.0.2`, how-to-play on the same screen as Start, overall Best from localStorage that updates when beaten.
 
 ### 1.0.1
 - Fix spawn freeze: actors no longer snap back onto the tile center every sub-step, so Pac-Man keeps moving after READY.
