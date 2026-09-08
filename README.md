@@ -1,4 +1,4 @@
-# Pac-Man v1.0.0
+# Pac-Man v1.0.1
 
 Arcade maze chase from Playadda. Eat every pellet, grab the energizers, and stay ahead of four ghosts.
 
@@ -46,3 +46,10 @@ location /pacman/ {
 ## License
 
 Use and modify freely for personal or commercial projects.
+
+
+## Changelog
+
+### 1.0.1
+- Fix spawn freeze: actors no longer snap back onto the tile center every sub-step, so Pac-Man keeps moving after READY.
+- Keyboard (arrows/WASD, `e.key` fallback), D-pad tap-to-turn, and swipe all latch a heading. Finger-up does not stop Pac-Man.

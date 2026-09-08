@@ -21,13 +21,28 @@ export function PacmanApp() {
   useEffect(() => {
     const sim = new PacmanSim();
     simRef.current = sim;
-    (window as unknown as { __pac: PacmanSim }).__pac = sim;
-
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
     const input = inputRef.current;
     const stage = stageRef.current!;
-    const detach = input.attach(stage);
+    const detach = input.attach(stage, (dir) => sim.setDir(dir));
+
+    const probe = {
+      getSpeed: () => (sim.state === "playing" ? 1 : 0),
+      getYaw: () => sim.pac.dir,
+      getX: () => sim.pac.x,
+      getY: () => sim.pac.y,
+      getState: () => sim.state,
+      getScore: () => sim.score,
+      setKeys: (codes: string[]) => input.setHeld(codes),
+      setDir: (dir: Dir) => sim.setDir(dir),
+    };
+    const w = window as unknown as {
+      __pac: PacmanSim;
+      __controlsTest: typeof probe;
+    };
+    w.__pac = sim;
+    w.__controlsTest = probe;
 
     let raf = 0;
     let last = performance.now();
@@ -74,6 +89,7 @@ export function PacmanApp() {
 
   const start = useCallback(() => {
     simRef.current?.startGame();
+    stageRef.current?.focus();
   }, []);
 
   const togglePause = useCallback(() => {
@@ -92,7 +108,7 @@ export function PacmanApp() {
   return (
     <div className="cabinet">
       <header className="cabinet-top">
-        <p className="eyebrow">Arcade · v1.0.0</p>
+        <p className="eyebrow">Arcade · v1.0.1</p>
         <h1 className="wordmark">Pac-Man</h1>
         <div className="cabinet-actions">
           <IconBtn label={hud.muted ? "Unmute" : "Mute"} onClick={toggleMute}>
@@ -106,7 +122,7 @@ export function PacmanApp() {
         </div>
       </header>
 
-      <div ref={stageRef} className="stage">
+      <div ref={stageRef} className="stage" tabIndex={0}>
         <canvas
           ref={canvasRef}
           width={VIEW_W}

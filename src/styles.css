@@ -134,6 +134,10 @@ button:not(:disabled) {
   user-select: none;
 }
 
+.stage:focus {
+  outline: none;
+}
+
 .stage-canvas {
   display: block;
   width: 100%;
