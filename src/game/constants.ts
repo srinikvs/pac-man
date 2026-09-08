@@ -15,13 +15,15 @@ export const DOOR_COL = 14;
 export const DOOR_ROW = 12;
 
 export const PAC_SPAWN = { x: 14, y: 23.5, dir: LEFT as Dir };
-export const BLINKY_SPAWN = { x: 14, y: 11.5, dir: LEFT as Dir };
+export const BLINKY_SPAWN = { x: 13.5, y: 11.5, dir: LEFT as Dir };
 export const PINKY_SPAWN = { x: 14, y: 14.5, dir: UP as Dir };
 export const INKY_SPAWN = { x: 12, y: 14.5, dir: UP as Dir };
 export const CLYDE_SPAWN = { x: 16, y: 14.5, dir: UP as Dir };
 
 export const HOUSE_EXIT = { x: 14, y: 11.5 };
 export const HOUSE_CENTER = { x: 14, y: 14.5 };
+/** Tile-center in the corridor above the gate (left door column). Park here after exiting so sprites are not straddling the wall. */
+export const EXIT_LANE = { x: 13.5, y: 11.5 };
 
 export const SCATTER: Record<GhostId, { x: number; y: number }> = {
   blinky: { x: 25, y: -2 },
@@ -163,12 +165,26 @@ export function frightTime(level: number): number {
   return table[level] ?? 1;
 }
 
-export function dotsToLeave(id: GhostId, level: number): number {
+export function dotsToLeave(id: GhostId, _level: number): number {
+  // All ghosts leave on the house clock (see houseReleaseAt). Dot counters
+  // stay at 0 so Inky/Clyde are not trapped while Pac is already scoring.
+  void _level;
   if (id === "blinky") return 0;
-  if (id === "pinky") return 0;
-  if (id === "inky") return level === 1 ? 30 : 0;
-  return level === 1 ? 90 : level === 2 ? 50 : 0;
+  return 0;
+}
+
+/** Seconds after READY begins before a penned ghost may leave. All 0: Inky/Clyde
+ *  start walking out immediately (travel to the door is the only stagger). */
+export function houseReleaseAt(id: GhostId): number {
+  switch (id) {
+    case "blinky":
+    case "pinky":
+    case "inky":
+    case "clyde":
+      return 0;
+  }
 }
 
 export const SAVE_KEY = "pacman.v1";
 export const SAVE_VERSION = 1;
+export const VERSION = "1.0.3";

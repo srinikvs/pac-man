@@ -3,8 +3,8 @@ import {
   BLINKY_SPAWN,
   CLYDE_SPAWN,
   DEATH_TIME,
-  dotsToLeave,
   EXTRA_LIFE_AT,
+  EXIT_LANE,
   FRUIT_AT,
   FRUIT_TIME,
   FRUIT_VALUES,
@@ -13,6 +13,7 @@ import {
   GHOST_SCORES,
   HOUSE_CENTER,
   HOUSE_EXIT,
+  houseReleaseAt,
   INKY_SPAWN,
   LEVEL_FLASH,
   NO_UP,
@@ -59,8 +60,6 @@ import { ArcadeAudio } from "./audio";
 import { loadSave, writeSave } from "./save";
 import { useHud } from "./store";
 
-const GHOST_IDS: GhostId[] = ["blinky", "pinky", "inky", "clyde"];
-
 export class PacmanSim {
   grid: Tile[][] = makeMaze();
   pac: Actor = { ...PAC_SPAWN, nextDir: PAC_SPAWN.dir };
@@ -91,6 +90,7 @@ export class PacmanSim {
   ghostPauseLeft = 0;
   flashLeft = 0;
   fruitTriggers = new Set<number>();
+  houseClock = 0;
 
   trauma = 0;
   acc = 0;
@@ -183,6 +183,8 @@ export class PacmanSim {
     if (this.state === "ready") {
       this.audio.setSiren("off");
       this.readyLeft -= dt;
+      this.houseClock += dt;
+      for (const g of this.ghosts) this.moveGhost(g, dt);
       if (this.readyLeft <= 0) {
         this.state = "playing";
         this.syncHud();
@@ -210,6 +212,7 @@ export class PacmanSim {
     }
 
     this.advanceModes(dt);
+    this.houseClock += dt;
     this.movePac(dt);
     for (const g of this.ghosts) this.moveGhost(g, dt);
     this.updateFruit(dt);
@@ -233,6 +236,7 @@ export class PacmanSim {
     this.waveLeft = wavesFor(this.level)[0] ?? 7;
     this.frightLeft = 0;
     this.ghostCombo = 0;
+    this.houseClock = 0;
     this.resetActors(full);
   }
 
@@ -246,6 +250,7 @@ export class PacmanSim {
       spawnGhost("clyde", CLYDE_SPAWN, "house"),
     ];
     this.deathAnim = 0;
+    this.houseClock = 0;
   }
 
   private afterDeath(): void {
@@ -365,7 +370,9 @@ export class PacmanSim {
   private movePac(dt: number): void {
     if (this.pendingDir !== null) this.pac.nextDir = this.pendingDir;
     if (this.pac.nextDir === REVERSE[this.pac.dir]) this.pac.dir = this.pac.nextDir;
-    this.advance(this.pac, this.pacSpeed() * dt, "pac", true);
+    this.advance(this.pac, this.pacSpeed() * dt, "pac", () => {
+      tryTurn(this.grid, this.pac, this.pac.nextDir, "pac");
+    });
     this.eatAtPac();
   }
 
@@ -447,64 +454,86 @@ export class PacmanSim {
     g.bob += dt * 3;
     if (g.phase === "house") {
       g.y = HOUSE_CENTER.y + Math.sin(g.bob * 2) * 0.35;
-      if (this.pelletsEaten >= dotsToLeave(g.id, this.level)) {
+      if (this.ghostMayLeave(g)) {
         g.phase = "leave";
-        g.x = g.id === "inky" ? 12 : g.id === "clyde" ? 16 : 14;
+        g.x = g.id === "inky" ? INKY_SPAWN.x : g.id === "clyde" ? CLYDE_SPAWN.x : HOUSE_CENTER.x;
         g.y = HOUSE_CENTER.y;
-        g.dir = UP;
+        g.dir = g.x < HOUSE_EXIT.x ? RIGHT : g.x > HOUSE_EXIT.x ? LEFT : UP;
       }
       return;
     }
     if (g.phase === "leave") {
-      const speed = this.ghostSpeed(g) * dt;
-      if (Math.abs(g.x - HOUSE_EXIT.x) > 0.05) {
-        g.x += Math.sign(HOUSE_EXIT.x - g.x) * Math.min(speed, Math.abs(HOUSE_EXIT.x - g.x));
-        g.dir = g.x < HOUSE_EXIT.x ? RIGHT : LEFT;
-      } else {
-        g.x = HOUSE_EXIT.x;
-        if (g.y > HOUSE_EXIT.y) {
-          g.y -= Math.min(speed, g.y - HOUSE_EXIT.y);
-          g.dir = UP;
-        } else {
-          g.y = HOUSE_EXIT.y;
-          g.phase = this.frightLeft > 0 ? "frightened" : "out";
-          g.dir = LEFT;
-        }
-      }
+      this.walkExit(g, dt);
       return;
     }
     if (g.phase === "enter") {
       const speed = this.ghostSpeed(g) * dt;
+      g.x = HOUSE_EXIT.x;
       if (g.y < HOUSE_CENTER.y) {
-        g.x = HOUSE_EXIT.x;
         g.y += Math.min(speed, HOUSE_CENTER.y - g.y);
         g.dir = DOWN;
       } else {
         g.y = HOUSE_CENTER.y;
         g.phase = "leave";
+        g.dir = UP;
       }
       return;
     }
 
     const who = this.whoFor(g);
-    if (nearCenter(g.x) && nearCenter(g.y)) {
-      g.x = snapCenter(g.x);
-      g.y = snapCenter(g.y);
-      const next = this.pickGhostDir(g);
-      g.dir = next;
-    } else if (g.phase !== "eyes") {
-      // corridors: allow 180 only on reverse-mode already applied
-    }
-    this.advance(g, this.ghostSpeed(g) * dt, who);
+    this.advance(g, this.ghostSpeed(g) * dt, who, () => {
+      g.dir = this.pickGhostDir(g);
+    });
 
     if (g.phase === "eyes") {
-      const d = Math.hypot(g.x - HOUSE_EXIT.x, g.y - HOUSE_EXIT.y);
-      if (d < 0.45) {
+      if (Math.abs(g.y - HOUSE_EXIT.y) < 0.28 && Math.abs(g.x - HOUSE_EXIT.x) < 0.85) {
         g.x = HOUSE_EXIT.x;
         g.y = HOUSE_EXIT.y;
         g.phase = "enter";
       }
     }
+  }
+
+  private ghostMayLeave(g: Ghost): boolean {
+    if (g.id === "blinky") return true;
+    return this.houseClock >= houseReleaseAt(g.id);
+  }
+
+  /**
+   * House → corridor. Stay on the 2-tile door midline (x=14) until above the
+   * gate, then slide onto tile-center 13.5 so the sprite is fully in the aisle
+   * instead of half inside the gate wall. Once above the gate, never pull
+   * back to x=14 — that fight glued Pinky in the door.
+   */
+  private walkExit(g: Ghost, dt: number): void {
+    const speed = this.ghostSpeed(g) * dt;
+    const mid = HOUSE_EXIT.x;
+    const aboveGate = g.y <= HOUSE_EXIT.y + 0.02;
+
+    if (!aboveGate) {
+      if (Math.abs(g.x - mid) > 0.02) {
+        const dx = mid - g.x;
+        g.x += Math.sign(dx) * Math.min(speed, Math.abs(dx));
+        g.dir = dx > 0 ? RIGHT : LEFT;
+        return;
+      }
+      g.x = mid;
+      g.y -= Math.min(speed, g.y - HOUSE_EXIT.y);
+      g.dir = UP;
+      return;
+    }
+
+    g.y = HOUSE_EXIT.y;
+    if (g.x > EXIT_LANE.x + 0.02) {
+      g.x -= Math.min(speed, g.x - EXIT_LANE.x);
+      g.dir = LEFT;
+      return;
+    }
+    g.x = EXIT_LANE.x;
+    g.y = EXIT_LANE.y;
+    g.dir = LEFT;
+    g.nextDir = LEFT;
+    g.phase = this.frightLeft > 0 ? "frightened" : "out";
   }
 
   private pickGhostDir(g: Ghost): Dir {
@@ -569,9 +598,10 @@ export class PacmanSim {
   /**
    * Move along the current heading. Turns happen when the actor *crosses*
    * a tile center — never by snapping back into a wide "near center" window,
-   * which glued everyone to spawn (step 0.06 < epsilon 0.1).
+   * which glued everyone to spawn (step 0.06 < epsilon 0.1) and stuck ghosts
+   * on every intersection (ghost step 0.12 < nearCenter 0.18).
    */
-  private advance(a: Actor, dist: number, who: Who, steering = false): void {
+  private advance(a: Actor, dist: number, who: Who, onCenter?: () => void): void {
     let left = dist;
     const EPS = 1e-4;
     let guard = 0;
@@ -588,7 +618,7 @@ export class PacmanSim {
         left -= Math.max(toCenter, 0);
         a.x = cx;
         a.y = cy;
-        if (steering) tryTurn(this.grid, a, a.nextDir, who);
+        onCenter?.();
         const now = centerTile(a.x, a.y);
         const nc = now.col + DX[a.dir]!;
         const nr = now.row + DY[a.dir]!;
