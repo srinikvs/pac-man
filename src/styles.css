@@ -61,32 +61,60 @@ button:not(:disabled) {
 .cabinet-top {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   grid-template-areas:
-    "eyebrow actions"
-    "wordmark actions";
-  align-items: end;
+    "brand best actions";
+  align-items: center;
   column-gap: 12px;
+  row-gap: 4px;
 }
 
-.eyebrow {
-  grid-area: eyebrow;
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+.brand {
+  grid-area: brand;
+  min-width: 0;
 }
 
 .wordmark {
-  grid-area: wordmark;
-  margin: 4px 0 0;
+  margin: 0;
   font-family: var(--font-display);
   font-size: clamp(1.05rem, 3.4vw, 1.35rem);
   font-weight: 400;
   letter-spacing: 0.08em;
+  color: var(--color-pac);
+  line-height: 1.2;
+}
+
+.ver-id {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.best-chip {
+  grid-area: best;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 4.5rem;
+}
+
+.best-label {
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.best-value {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
   color: var(--color-pac);
   line-height: 1.2;
 }
@@ -153,13 +181,15 @@ button:not(:disabled) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px 18px;
-  background: color-mix(in oklab, var(--color-bg) 78%, transparent);
+  padding: 16px 14px;
+  background: color-mix(in oklab, var(--color-bg) 82%, transparent);
   color: var(--color-fg);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .overlay-title {
-  gap: 10px;
+  gap: 8px;
   text-align: center;
 }
 
@@ -176,55 +206,98 @@ button:not(:disabled) {
   font-family: var(--font-display);
   font-size: 8px;
   letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .overlay-logo {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-family: var(--font-display);
-  font-size: clamp(1.15rem, 5vw, 1.65rem);
+  font-size: clamp(1.05rem, 4.6vw, 1.5rem);
   color: var(--color-pac);
   letter-spacing: 0.1em;
   line-height: 1.2;
 }
 
 .overlay-tag {
-  margin: 0 0 8px;
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 0.9rem;
   color: var(--color-fg);
 }
 
-.ghost-list {
-  list-style: none;
-  margin: 4px 0 12px;
-  padding: 0;
-  display: grid;
-  gap: 8px;
-  width: min(100%, 240px);
-}
-
-.ghost-row {
-  display: grid;
-  grid-template-columns: 22px 1fr auto;
-  align-items: center;
-  gap: 10px;
+.howto {
+  width: min(100%, 280px);
   text-align: left;
 }
 
-.ghost-mark {
-  width: 18px;
-  height: 18px;
-}
-
-.ghost-nick {
+.howto-title {
+  margin: 4px 0 8px;
   font-family: var(--font-display);
   font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-pac);
+  text-align: center;
+}
+
+.howto-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.howto-list li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.howto-n {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: var(--color-pac);
+  font-family: var(--font-display);
+  font-size: 8px;
+  line-height: 1;
+}
+
+.howto-t {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-fg);
+}
+
+.ghost-strip {
+  list-style: none;
+  margin: 4px 0 2px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, 280px);
+}
+
+.ghost-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 6px;
+  letter-spacing: 0.06em;
   color: var(--color-muted);
 }
 
-.ghost-name {
-  font-family: var(--font-display);
-  font-size: 8px;
-  color: var(--color-fg);
+.ghost-mark {
+  width: 16px;
+  height: 16px;
 }
 
 .start-btn {
@@ -379,6 +452,15 @@ button:not(:disabled) {
       calc((100dvh - 16rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 224 / 288),
       448px
     );
+  }
+
+  .overlay-title {
+    justify-content: flex-start;
+    padding-top: 12px;
+  }
+
+  .howto-t {
+    font-size: 0.75rem;
   }
 }
 

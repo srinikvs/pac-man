@@ -1,4 +1,4 @@
-# Pac-Man v1.0.1
+# Pac-Man v1.0.3
 
 Arcade maze chase from Playadda. Eat every pellet, grab the energizers, and stay ahead of four ghosts.
 
@@ -49,6 +49,13 @@ Use and modify freely for personal or commercial projects.
 
 
 ## Changelog
+
+### 1.0.3
+- Ghost pathing: tile-center crossing instead of a near-center snap window, so ghosts leave intersections instead of gluing to them.
+- House exit: Pinky / Inky / Clyde walk the door midline, then park on the corridor tile (13.5, 11.5). No more half-in-wall spawn gate.
+- All four ghosts leave on a short stagger (Pinky immediately, Inky 0.55s, Clyde 1.2s) then scatter/chase. Inky and Clyde no longer wait 30/90 pellets.
+- Playadda UX: visible version id, how-to-play + Start on the title screen, Best high score in the header (localStorage, live update).
+
 
 ### 1.0.1
 - Fix spawn freeze: actors no longer snap back onto the tile center every sub-step, so Pac-Man keeps moving after READY.
