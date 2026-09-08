@@ -173,17 +173,15 @@ export function dotsToLeave(id: GhostId, _level: number): number {
   return 0;
 }
 
-/** Seconds after play starts before a penned ghost is allowed to leave. */
+/** Seconds after READY begins before a penned ghost may leave. All 0: Inky/Clyde
+ *  start walking out immediately (travel to the door is the only stagger). */
 export function houseReleaseAt(id: GhostId): number {
   switch (id) {
     case "blinky":
-      return 0;
     case "pinky":
-      return 0;
     case "inky":
-      return 0.55;
     case "clyde":
-      return 1.2;
+      return 0;
   }
 }
 

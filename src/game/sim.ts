@@ -183,6 +183,8 @@ export class PacmanSim {
     if (this.state === "ready") {
       this.audio.setSiren("off");
       this.readyLeft -= dt;
+      this.houseClock += dt;
+      for (const g of this.ghosts) this.moveGhost(g, dt);
       if (this.readyLeft <= 0) {
         this.state = "playing";
         this.syncHud();
