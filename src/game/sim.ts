@@ -122,8 +122,12 @@ export class PacmanSim {
   }
 
   startGame(): void {
-    this.audio.unlock();
-    this.audio.intro();
+    try {
+      this.audio.unlock();
+      this.audio.intro();
+    } catch {
+      /* AudioContext can throw on some mobile browsers; never block play. */
+    }
     this.score = 0;
     this.lives = 3;
     this.level = 1;
@@ -148,6 +152,9 @@ export class PacmanSim {
   setDir(dir: Dir): void {
     this.pendingDir = dir;
     this.pac.nextDir = dir;
+    if (dir === REVERSE[this.pac.dir] && (this.state === "playing" || this.state === "ready")) {
+      this.pac.dir = dir;
+    }
   }
 
   update(dt: number): void {
@@ -176,8 +183,10 @@ export class PacmanSim {
     if (this.state === "ready") {
       this.audio.setSiren("off");
       this.readyLeft -= dt;
-      if (this.readyLeft <= 0) this.state = "playing";
-      this.syncHud();
+      if (this.readyLeft <= 0) {
+        this.state = "playing";
+        this.syncHud();
+      }
       return;
     }
     if (this.state === "dying") {
@@ -355,6 +364,7 @@ export class PacmanSim {
 
   private movePac(dt: number): void {
     if (this.pendingDir !== null) this.pac.nextDir = this.pendingDir;
+    if (this.pac.nextDir === REVERSE[this.pac.dir]) this.pac.dir = this.pac.nextDir;
     this.advance(this.pac, this.pacSpeed() * dt, "pac", true);
     this.eatAtPac();
   }
@@ -556,30 +566,46 @@ export class PacmanSim {
     return SCATTER.clyde;
   }
 
+  /**
+   * Move along the current heading. Turns happen when the actor *crosses*
+   * a tile center — never by snapping back into a wide "near center" window,
+   * which glued everyone to spawn (step 0.06 < epsilon 0.1).
+   */
   private advance(a: Actor, dist: number, who: Who, steering = false): void {
     let left = dist;
-    while (left > 0.0001) {
-      const atX = nearCenter(a.x, 0.1);
-      const atY = nearCenter(a.y, 0.1);
-      if (atX && atY) {
-        a.x = snapCenter(a.x);
-        a.y = snapCenter(a.y);
+    const EPS = 1e-4;
+    let guard = 0;
+    while (left > EPS) {
+      if (++guard > 64) break;
+      const dx = DX[a.dir]!;
+      const dy = DY[a.dir]!;
+      if (dx === 0 && dy === 0) return;
+      const { col, row } = centerTile(a.x, a.y);
+      const cx = col + 0.5;
+      const cy = row + 0.5;
+      const toCenter = dx !== 0 ? (cx - a.x) / dx : (cy - a.y) / dy;
+      if (toCenter >= -EPS && toCenter <= left) {
+        left -= Math.max(toCenter, 0);
+        a.x = cx;
+        a.y = cy;
         if (steering) tryTurn(this.grid, a, a.nextDir, who);
-        const { col, row } = centerTile(a.x, a.y);
-        const nc = col + DX[a.dir]!;
-        const nr = row + DY[a.dir]!;
-        if (!canEnter(this.grid, nc, nr, who)) {
-          return;
-        }
+        const now = centerTile(a.x, a.y);
+        const nc = now.col + DX[a.dir]!;
+        const nr = now.row + DY[a.dir]!;
+        if (!canEnter(this.grid, nc, nr, who)) return;
+        const nudge = Math.min(left, 1e-3);
+        a.x += DX[a.dir]! * nudge;
+        a.y += DY[a.dir]! * nudge;
+        left -= nudge;
+      } else {
+        a.x += dx * left;
+        a.y += dy * left;
+        left = 0;
       }
-      const step = Math.min(left, 0.06);
-      a.x += DX[a.dir]! * step;
-      a.y += DY[a.dir]! * step;
       if (Math.round(a.y - 0.5) === TUNNEL_ROW) {
         if (a.x < -0.5) a.x += 28;
         if (a.x >= 28.5) a.x -= 28;
       }
-      left -= step;
     }
   }
 

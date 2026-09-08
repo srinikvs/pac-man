@@ -11,18 +11,19 @@ export function Dpad({ onDir }: DpadProps) {
     (dir: Dir) => (e: PointerEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      e.currentTarget.setPointerCapture(e.pointerId);
       onDir(dir);
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        /* some WebViews reject capture; direction is already latched */
+      }
     },
     [onDir],
   );
-  const release = useCallback(
-    (e: PointerEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      onDir(null);
-    },
-    [onDir],
-  );
+  const release = useCallback((e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    /* Keep last heading — arcade Pac-Man does not stop on finger-up. */
+  }, []);
 
   return (
     <div className="dpad" aria-label="Direction pad">
@@ -64,6 +65,10 @@ function PadBtn({
       onPointerDown={onHold(dir)}
       onPointerUp={onRelease}
       onPointerCancel={onRelease}
+      onClick={(e) => {
+        e.preventDefault();
+        onHold(dir)(e as PointerEvent<HTMLButtonElement>);
+      }}
     >
       {children}
     </button>
