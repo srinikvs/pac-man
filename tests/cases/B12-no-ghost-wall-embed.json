@@ -5,8 +5,7 @@
   "gate": "block",
   "steps": [
     { "op": "openFresh" },
-    { "op": "click", "testId": "start" },
-    { "op": "waitState", "state": ["ready", "playing"] },
+    { "op": "startPlay" },
     { "op": "watchEmbed", "seconds": 18 }
   ],
   "expect": [

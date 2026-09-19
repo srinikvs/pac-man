@@ -8,8 +8,7 @@
     { "op": "openFresh" },
     { "op": "expect", "assert": "visible", "testId": "howto" },
     { "op": "expect", "assert": "visible", "testId": "start" },
-    { "op": "click", "testId": "start" },
-    { "op": "waitState", "state": ["ready", "playing"] }
+    { "op": "startPlay" }
   ],
   "expect": [
     { "assert": "stateIn", "values": ["ready", "playing"] },

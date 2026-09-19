@@ -9,8 +9,7 @@
     { "op": "expect", "assert": "text", "testId": "version", "match": "v1\\.\\d+\\.\\d+" },
     { "op": "expect", "assert": "visible", "testId": "start-version" },
     { "op": "expect", "assert": "text", "testId": "start-version", "match": "v1\\.\\d+\\.\\d+" },
-    { "op": "click", "testId": "start" },
-    { "op": "waitState", "state": ["ready", "playing"] }
+    { "op": "startPlay" }
   ],
   "expect": [
     { "assert": "visible", "testId": "hud" },

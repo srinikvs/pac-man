@@ -5,9 +5,8 @@
   "gate": "block",
   "steps": [
     { "op": "openFresh" },
-    { "op": "click", "testId": "start" },
-    { "op": "waitState", "state": ["ready", "playing"] },
-    { "op": "simTick", "seconds": 3.2 }
+    { "op": "startPlay" },
+    { "op": "waitGhostsLeftHouse", "maxSeconds": 6, "chunk": 0.8 }
   ],
   "expect": [
     { "assert": "ghostsLeftHouse" },

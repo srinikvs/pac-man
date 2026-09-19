@@ -38,18 +38,38 @@ npm run test:e2e:desktop # 1280×800 Start smoke (B-desktop-start)
 
 `npm run test:e2e:pixel` runs **only** the Pixel catalog (`tests/e2e/pixel.catalog.spec.ts`): B8–B15 plus C16–C19. Those cases are registered on the pixel project — they are not `test.skip` placeholders. The desktop project loads `desktop.catalog.spec.ts` (Start smoke only) and does not list C16–C19.
 
-`test:e2e` builds `dist/` and starts `vite preview` at `http://127.0.0.1:4173/pacman/` unless `BASE_URL` is set. Failure screenshots land in `test-results/`.
+`test:e2e` **defaults to a local `vite preview`** at `http://127.0.0.1:4173/pacman/` (builds `dist/` so this checkout’s `data-testid` hooks are present). Failure screenshots land in `test-results/`.
+
+### Jenkins `pacman-ci` (DEPLOY=false)
+
+`pacman-ci` must run Playwright against **local preview**, not live playaddatest:
+
+```bash
+CI=1 DEPLOY=false npm test
+CI=1 DEPLOY=false npm run test:e2e
+CI=1 DEPLOY=false npm run test:e2e:pixel
+```
+
+`DEPLOY=false` (or CI without `DEPLOY=true`) **ignores** a leftover `BASE_URL` so the job cannot skip `webServer` and hit an unpublished host. Block gates stay enforced on this local path.
 
 ## Live smoke (`BASE_URL`)
 
 Default local preview: `http://127.0.0.1:4173/pacman/` (Vite `base` is `/pacman/`).
 
+Live playaddatest/prod smoke is **opt-in**. It needs a **published build that includes the testid hooks** (`data-testid="start"`, `howto`, `version`, `dpad`, …). Today’s playaddatest Pac-Man may predate those hooks.
+
 ```bash
+# Manual (no CI): hits the remote host
 BASE_URL=https://playaddatest.duckdns.org/pacman/ npm run test:e2e
 BASE_URL=https://playadda.duckdns.org/pacman/ npm run test:e2e
+
+# Jenkins live smoke (explicit)
+CI=1 DEPLOY=true BASE_URL=https://playaddatest.duckdns.org/pacman/ npm run test:e2e
 ```
 
-Playaddatest and production mount the game at `/pacman/` (see `deploy/nginx.pacman.conf`). When `BASE_URL` is set, Playwright does not start a local webServer.
+Playaddatest and production mount the game at `/pacman/` (see `deploy/nginx.pacman.conf`). When a live target is actually selected, Playwright does not start a local webServer.
+
+If live `BASE_URL` is selected but `[data-testid=start]` is missing, the e2e catalog **skips** (does not fail) with a message that the published build lacks the hooks. Use `DEPLOY=false` for the local path that must stay green.
 
 ## Catalog (A–C)
 

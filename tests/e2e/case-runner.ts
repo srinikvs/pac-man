@@ -142,8 +142,9 @@ async function applyExpect(page: Page, ctx: Ctx, exp: Expectation, caseId: strin
       return;
     }
     case "scoreAtLeast": {
-      const p = await readProbe(page);
-      expect(p.score, tag).toBeGreaterThanOrEqual(Number(exp.value));
+      await expect
+        .poll(async () => (await readProbe(page)).score, { message: tag })
+        .toBeGreaterThanOrEqual(Number(exp.value));
       return;
     }
     case "scoreIncreased": {
@@ -152,17 +153,20 @@ async function applyExpect(page: Page, ctx: Ctx, exp: Expectation, caseId: strin
       return;
     }
     case "bestAtLeast": {
-      const p = await readProbe(page);
       const chip = page.getByTestId("best-value");
       await expect(chip, tag).toBeVisible();
-      expect(p.high, tag).toBeGreaterThanOrEqual(Number(exp.value));
-      const text = (await chip.textContent()) ?? "";
-      expect(Number(text), tag).toBeGreaterThanOrEqual(Number(exp.value));
+      await expect
+        .poll(async () => (await readProbe(page)).high, { message: tag })
+        .toBeGreaterThanOrEqual(Number(exp.value));
+      await expect
+        .poll(async () => Number((await chip.textContent()) ?? ""), { message: tag })
+        .toBeGreaterThanOrEqual(Number(exp.value));
       return;
     }
     case "storageBestAtLeast": {
-      const save = await readSave(page);
-      expect(save?.highScore ?? 0, tag).toBeGreaterThanOrEqual(Number(exp.value));
+      await expect
+        .poll(async () => (await readSave(page))?.highScore ?? 0, { message: tag })
+        .toBeGreaterThanOrEqual(Number(exp.value));
       return;
     }
     case "bestSurvivesReload": {
@@ -177,11 +181,17 @@ async function applyExpect(page: Page, ctx: Ctx, exp: Expectation, caseId: strin
       return;
     }
     case "ghostsLeftHouse": {
-      const p = await readProbe(page);
-      expect(p.ghosts.length, tag).toBe(4);
-      for (const g of p.ghosts) {
-        expect(["out", "frightened"].includes(g.phase), `${tag} ${g.id}=${g.phase}`).toBeTruthy();
-      }
+      await expect
+        .poll(
+          async () => {
+            const p = await readProbe(page);
+            if (p.ghosts.length !== 4) return p.ghosts.map((g) => `${g.id}:${g.phase}`).join(",") || "none";
+            const pending = p.ghosts.filter((g) => g.phase !== "out" && g.phase !== "frightened");
+            return pending.length === 0 ? "out" : pending.map((g) => `${g.id}:${g.phase}`).join(",");
+          },
+          { message: tag },
+        )
+        .toBe("out");
       return;
     }
     case "noWallEmbed": {
@@ -270,6 +280,34 @@ async function runStep(page: Page, ctx: Ctx, step: Step, c: CaseFile): Promise<v
     case "click":
       await page.getByTestId(String(step.testId)).click();
       return;
+    case "startPlay": {
+      await page.getByTestId("start").click();
+      await expect
+        .poll(async () => (await readProbe(page)).state, { message: `${c.id} startPlay` })
+        .not.toBe("title");
+      await snapshotStart(page, ctx);
+      return;
+    }
+    case "waitGhostsLeftHouse": {
+      const max = Number(step.maxSeconds ?? 6);
+      const chunk = Number(step.chunk ?? 0.8);
+      let t = 0;
+      while (t < max) {
+        const p = await readProbe(page);
+        if (
+          p.ghosts.length === 4 &&
+          p.ghosts.every((g) => g.phase === "out" || g.phase === "frightened")
+        ) {
+          return;
+        }
+        await simTick(page, chunk);
+        t += chunk;
+      }
+      const p = await readProbe(page);
+      const leftover = p.ghosts.filter((g) => g.phase !== "out" && g.phase !== "frightened");
+      expect(leftover.map((g) => `${g.id}:${g.phase}`), `${c.id}/waitGhostsLeftHouse`).toEqual([]);
+      return;
+    }
     case "waitState": {
       const allowed = (Array.isArray(step.state) ? step.state : [step.state]) as string[];
       await expect

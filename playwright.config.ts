@@ -1,7 +1,8 @@
 import { defineConfig } from "@playwright/test";
+import { logPlaywrightTarget, resolvePlaywrightTarget } from "./tests/e2e/target.ts";
 
-const remote = process.env.BASE_URL?.trim();
-const baseURL = (remote || "http://127.0.0.1:4173/pacman/").replace(/\/?$/, "/");
+const target = resolvePlaywrightTarget();
+logPlaywrightTarget(target);
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -13,20 +14,20 @@ export default defineConfig({
   expect: { timeout: 12_000 },
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
   use: {
-    baseURL,
+    baseURL: target.baseURL,
     browserName: "chromium",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
     video: "off",
   },
-  webServer: remote
-    ? undefined
-    : {
+  webServer: target.local
+    ? {
         command: "npm run build && npm run preview -- --host 127.0.0.1 --port 4173",
         url: "http://127.0.0.1:4173/pacman/",
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,
-      },
+      }
+    : undefined,
   projects: [
     {
       name: "pixel",

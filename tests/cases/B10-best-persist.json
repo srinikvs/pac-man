@@ -6,11 +6,12 @@
   "steps": [
     { "op": "openFresh", "best": 5 },
     { "op": "expect", "assert": "bestValue", "value": 5 },
-    { "op": "click", "testId": "start" },
+    { "op": "startPlay" },
     { "op": "simTick", "seconds": 2.3 },
     { "op": "parkGhosts" },
     { "op": "setDir", "dir": "left" },
-    { "op": "simTick", "seconds": 1.4 }
+    { "op": "simTick", "seconds": 1.6 },
+    { "op": "waitScoreIncrease", "timeout": 8000 }
   ],
   "expect": [
     { "assert": "scoreAtLeast", "value": 20 },

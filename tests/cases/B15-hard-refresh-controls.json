@@ -5,13 +5,14 @@
   "gate": "optional",
   "steps": [
     { "op": "openFresh" },
-    { "op": "click", "testId": "start" },
+    { "op": "startPlay" },
     { "op": "simTick", "seconds": 2.3 },
     { "op": "parkGhosts" },
     { "op": "steer", "dir": "left" },
+    { "op": "simTick", "seconds": 1.0 },
     { "op": "waitScoreIncrease", "timeout": 8000 },
     { "op": "reload" },
-    { "op": "click", "testId": "start" },
+    { "op": "startPlay" },
     { "op": "simTick", "seconds": 2.3 },
     { "op": "parkGhosts" },
     { "op": "steer", "dir": "right" }

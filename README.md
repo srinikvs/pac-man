@@ -47,12 +47,7 @@ npm run test:e2e
 npm run test:e2e:pixel
 ```
 
-Local preview default is `http://127.0.0.1:4173/pacman/`. Live smoke:
-
-```bash
-BASE_URL=https://playaddatest.duckdns.org/pacman/ npm run test:e2e
-BASE_URL=https://playadda.duckdns.org/pacman/ npm run test:e2e
-```
+`npm run test:e2e` builds this checkout and serves `http://127.0.0.1:4173/pacman/` (Jenkins `pacman-ci`: `CI=1 DEPLOY=false`). Live `BASE_URL` smoke is opt-in and needs a published build that includes the testid hooks — see [TESTING.md](TESTING.md).
 
 ## Stack
 

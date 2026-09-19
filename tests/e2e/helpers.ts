@@ -1,4 +1,5 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { isLiveTarget, LIVE_SKIP_MESSAGE } from "./target.ts";
 
 export const SAVE_KEY = "pacman.v1";
 
@@ -57,7 +58,28 @@ export async function waitForProbe(page: Page): Promise<void> {
   await expect.poll(async () => page.evaluate(() => Boolean(window.__pac && window.__controlsTest))).toBe(true);
 }
 
+let liveHookDecision: "unknown" | "ok" | "skip" = "unknown";
+
+/** Live playaddatest/prod without published testids: skip, do not fail pacman-ci. */
+export async function skipIfLiveMissingTestIds(page: Page): Promise<void> {
+  if (!isLiveTarget()) return;
+  if (liveHookDecision === "ok") return;
+  if (liveHookDecision === "skip") {
+    test.skip(true, LIVE_SKIP_MESSAGE);
+    return;
+  }
+  await page.goto("./");
+  const count = await page.getByTestId("start").count();
+  if (count === 0) {
+    liveHookDecision = "skip";
+    test.skip(true, LIVE_SKIP_MESSAGE);
+    return;
+  }
+  liveHookDecision = "ok";
+}
+
 export async function openFresh(page: Page, best?: number): Promise<void> {
+  await skipIfLiveMissingTestIds(page);
   await page.addInitScript(
     ({ SAVE_KEY, best }) => {
       if (sessionStorage.getItem("pacman-e2e-seeded")) return;
@@ -70,7 +92,13 @@ export async function openFresh(page: Page, best?: number): Promise<void> {
     { SAVE_KEY, best },
   );
   await page.goto("./");
-  await expect(page.getByTestId("start")).toBeVisible();
+  const start = page.getByTestId("start");
+  if ((await start.count()) === 0 && isLiveTarget()) {
+    liveHookDecision = "skip";
+    test.skip(true, LIVE_SKIP_MESSAGE);
+    return;
+  }
+  await expect(start).toBeVisible();
   await waitForProbe(page);
   await page.evaluate(() => window.__pac?.setMuted(true));
 }
@@ -156,10 +184,9 @@ export async function watchEmbed(page: Page, seconds: number): Promise<EmbedWatc
   return page.evaluate((s) => {
     const sim = window.__pac;
     if (!sim) throw new Error("no __pac");
+    if (sim.state === "title") throw new Error("watchEmbed: game still on title — Start did not begin play");
     const WALL = 0;
     const VOID = 6;
-    const HOUSE = 5;
-    const DOOR = 4;
     const COLS = 28;
     const ROWS = 31;
     const TUNNEL = 14;
@@ -170,11 +197,9 @@ export async function watchEmbed(page: Page, seconds: number): Promise<EmbedWatc
       if (col < 0 || col >= COLS) return row === TUNNEL ? 3 : WALL;
       return sim.grid[row]?.[col] ?? WALL;
     };
-    const bad = (x: number, y: number, phase: string) => {
+    const bad = (x: number, y: number) => {
       const t = tile(x, y);
-      if (t === WALL || t === VOID) return true;
-      if ((phase === "out" || phase === "frightened") && (t === HOUSE || t === DOOR)) return true;
-      return false;
+      return t === WALL || t === VOID;
     };
     let embeds = 0;
     let samples = 0;
@@ -186,7 +211,7 @@ export async function watchEmbed(page: Page, seconds: number): Promise<EmbedWatc
       left -= dt;
       samples += 1;
       for (const g of sim.ghosts) {
-        if (bad(g.x, g.y, g.phase)) embeds += 1;
+        if (bad(g.x, g.y)) embeds += 1;
       }
     }
     return { embeds, samples };

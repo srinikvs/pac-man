@@ -1,6 +1,11 @@
 import { test } from "@playwright/test";
 import { casesForPlaywrightProject } from "../cases/load.ts";
 import { runE2ECase } from "./case-runner.ts";
+import { skipIfLiveMissingTestIds } from "./helpers.ts";
+
+test.beforeEach(async ({ page }) => {
+  await skipIfLiveMissingTestIds(page);
+});
 
 for (const c of casesForPlaywrightProject("pixel")) {
   test(`${c.id}: ${c.title}`, async ({ page }, info) => {
