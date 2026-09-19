@@ -197,12 +197,21 @@ export async function forceGameOver(page: Page): Promise<void> {
   await page.evaluate(() => {
     const sim = window.__pac;
     if (!sim) throw new Error("no __pac");
+    const step = 1 / 60;
+    const tick = (seconds: number) => {
+      let left = seconds;
+      while (left > 1e-9) {
+        const dt = Math.min(step, left);
+        sim.update(dt);
+        left -= dt;
+      }
+    };
     const death = 1.8;
-    for (let i = 0; i < 5 && sim.state !== "gameover"; i++) {
+    for (let i = 0; i < 6 && sim.state !== "gameover"; i++) {
       if (sim.state === "title") sim.startGame();
       if (sim.state === "ready" || sim.state === "paused" || sim.state === "ghostpause") sim.state = "playing";
       if (sim.state === "dying") {
-        sim.update(death + 0.05);
+        tick(death + 0.05);
         continue;
       }
       const g = sim.ghosts[0];
@@ -210,8 +219,9 @@ export async function forceGameOver(page: Page): Promise<void> {
       g.phase = "out";
       g.x = sim.pac.x;
       g.y = sim.pac.y;
-      sim.update(1 / 60);
-      if (sim.state === "dying") sim.update(death + 0.05);
+      tick(step);
+      if (sim.state === "dying") tick(death + 0.05);
     }
+    if (sim.state !== "gameover") throw new Error(`forceGameOver ended in ${sim.state}`);
   });
 }

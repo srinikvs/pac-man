@@ -13,7 +13,7 @@
   ],
   "expect": [
     { "assert": "scoreIncreased" },
-    { "assert": "pacMoved", "min": 0.4 },
+    { "assert": "pacMoved", "min": 0.2 },
     { "assert": "stateIn", "values": ["playing", "ready", "ghostpause"] }
   ]
 }

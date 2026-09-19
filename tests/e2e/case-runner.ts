@@ -273,8 +273,8 @@ async function runStep(page: Page, ctx: Ctx, step: Step, c: CaseFile): Promise<v
     case "waitState": {
       const allowed = (Array.isArray(step.state) ? step.state : [step.state]) as string[];
       await expect
-        .poll(async () => (await readProbe(page)).state, { message: `${c.id} waitState` })
-        .toSatisfy((s) => allowed.includes(String(s)));
+        .poll(async () => allowed.includes((await readProbe(page)).state), { message: `${c.id} waitState` })
+        .toBe(true);
       await snapshotStart(page, ctx);
       return;
     }
