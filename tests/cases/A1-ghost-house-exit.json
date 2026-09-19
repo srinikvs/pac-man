@@ -1,0 +1,21 @@
+{
+  "id": "A1",
+  "layer": "unit",
+  "title": "Ghost house exit timers / release order (Blinky/Pinky/Inky/Clyde)",
+  "gate": "optional",
+  "steps": [
+    { "op": "startGame" },
+    { "op": "tick", "seconds": 0.12 },
+    { "op": "expect", "assert": "ghostPhase", "id": "blinky", "phase": "out" },
+    { "op": "expect", "assert": "ghostPhaseIn", "id": "pinky", "phases": ["house", "leave"] },
+    { "op": "expect", "assert": "ghostPhaseIn", "id": "inky", "phases": ["house", "leave"] },
+    { "op": "expect", "assert": "ghostPhaseIn", "id": "clyde", "phases": ["house", "leave"] },
+    { "op": "expect", "assert": "closerToExit", "id": "pinky", "than": ["inky", "clyde"] },
+    { "op": "tick", "seconds": 2.6 }
+  ],
+  "expect": [
+    { "assert": "releaseTimersZero" },
+    { "assert": "allGhostsLeftHouse" },
+    { "assert": "noWallEmbed" }
+  ]
+}

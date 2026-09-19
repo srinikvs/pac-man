@@ -1,0 +1,15 @@
+{
+  "id": "A2",
+  "layer": "unit",
+  "title": "No wall-embed at spawn gate — ghosts park on the corridor tile",
+  "gate": "optional",
+  "steps": [
+    { "op": "startGame" },
+    { "op": "watchExitUntilOut", "maxSeconds": 4 }
+  ],
+  "expect": [
+    { "assert": "allGhostsLeftHouse" },
+    { "assert": "exitLanePark", "slop": 0.7 },
+    { "assert": "noWallEmbed", "duringWatch": true, "includePac": true }
+  ]
+}

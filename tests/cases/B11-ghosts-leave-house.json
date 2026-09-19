@@ -1,0 +1,16 @@
+{
+  "id": "B11",
+  "layer": "e2e",
+  "title": "All four ghosts leave the house cleanly",
+  "gate": "block",
+  "steps": [
+    { "op": "openFresh" },
+    { "op": "click", "testId": "start" },
+    { "op": "waitState", "state": ["ready", "playing"] },
+    { "op": "simTick", "seconds": 3.2 }
+  ],
+  "expect": [
+    { "assert": "ghostsLeftHouse" },
+    { "assert": "noWallEmbed" }
+  ]
+}

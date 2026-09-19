@@ -26,17 +26,17 @@ export function Dpad({ onDir }: DpadProps) {
   }, []);
 
   return (
-    <div className="dpad" aria-label="Direction pad">
-      <PadBtn className="dpad-up" dir={UP} onHold={hold} onRelease={release}>
+    <div className="dpad" data-testid="dpad" aria-label="Direction pad">
+      <PadBtn className="dpad-up" testId="dpad-up" dir={UP} onHold={hold} onRelease={release}>
         <ChevronUp className="icon-lg" strokeWidth={2.4} />
       </PadBtn>
-      <PadBtn className="dpad-left" dir={LEFT} onHold={hold} onRelease={release}>
+      <PadBtn className="dpad-left" testId="dpad-left" dir={LEFT} onHold={hold} onRelease={release}>
         <ChevronLeft className="icon-lg" strokeWidth={2.4} />
       </PadBtn>
-      <PadBtn className="dpad-right" dir={RIGHT} onHold={hold} onRelease={release}>
+      <PadBtn className="dpad-right" testId="dpad-right" dir={RIGHT} onHold={hold} onRelease={release}>
         <ChevronRight className="icon-lg" strokeWidth={2.4} />
       </PadBtn>
-      <PadBtn className="dpad-down" dir={DOWN} onHold={hold} onRelease={release}>
+      <PadBtn className="dpad-down" testId="dpad-down" dir={DOWN} onHold={hold} onRelease={release}>
         <ChevronDown className="icon-lg" strokeWidth={2.4} />
       </PadBtn>
       <div className="dpad-core" aria-hidden />
@@ -46,12 +46,14 @@ export function Dpad({ onDir }: DpadProps) {
 
 function PadBtn({
   className,
+  testId,
   dir,
   onHold,
   onRelease,
   children,
 }: {
   className: string;
+  testId: string;
   dir: Dir;
   onHold: (dir: Dir) => (e: PointerEvent<HTMLButtonElement>) => void;
   onRelease: (e: PointerEvent<HTMLButtonElement>) => void;
@@ -61,6 +63,7 @@ function PadBtn({
     <button
       type="button"
       className={`dpad-btn ${className}`}
+      data-testid={testId}
       aria-label={label(dir)}
       onPointerDown={onHold(dir)}
       onPointerUp={onRelease}

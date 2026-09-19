@@ -1,0 +1,19 @@
+{
+  "id": "A3",
+  "layer": "unit",
+  "title": "Pac movement + pellet score increments",
+  "gate": "optional",
+  "steps": [
+    { "op": "startPlaying" },
+    { "op": "parkGhosts" },
+    { "op": "setDir", "dir": "left" },
+    { "op": "tick", "seconds": 1.1 }
+  ],
+  "expect": [
+    { "assert": "pacMoved", "min": 0.8 },
+    { "assert": "pelletsEaten", "min": 2 },
+    { "assert": "scoreAtLeast", "value": 20 },
+    { "assert": "scoreIncreased" },
+    { "assert": "state", "value": "playing" }
+  ]
+}

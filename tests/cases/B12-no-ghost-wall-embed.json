@@ -1,0 +1,15 @@
+{
+  "id": "B12",
+  "layer": "e2e",
+  "title": "No ghost wall-embed at spawn or in the maze for the first ~18s",
+  "gate": "block",
+  "steps": [
+    { "op": "openFresh" },
+    { "op": "click", "testId": "start" },
+    { "op": "waitState", "state": ["ready", "playing"] },
+    { "op": "watchEmbed", "seconds": 18 }
+  ],
+  "expect": [
+    { "assert": "noWallEmbed", "duringWatch": true }
+  ]
+}

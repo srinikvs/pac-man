@@ -1,0 +1,16 @@
+{
+  "id": "C19",
+  "layer": "pixel",
+  "title": "Pixel: ghosts/Pac not clipped at maze edges on start",
+  "gate": "optional",
+  "steps": [
+    { "op": "openFresh" },
+    { "op": "click", "testId": "start" },
+    { "op": "waitState", "state": ["ready", "playing"] }
+  ],
+  "expect": [
+    { "assert": "mazeFullyVisible" },
+    { "assert": "spritesInMaze" },
+    { "assert": "noVerticalClip", "testId": ["maze", "stage"] }
+  ]
+}

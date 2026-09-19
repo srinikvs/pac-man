@@ -1,0 +1,17 @@
+{
+  "id": "B14",
+  "layer": "e2e",
+  "title": "Life / game-over path smoke",
+  "gate": "optional",
+  "steps": [
+    { "op": "openFresh" },
+    { "op": "click", "testId": "start" },
+    { "op": "waitState", "state": ["ready", "playing"] },
+    { "op": "forceGameOver" }
+  ],
+  "expect": [
+    { "assert": "visible", "testId": "gameover" },
+    { "assert": "state", "value": "gameover" },
+    { "assert": "visible", "testId": "retry" }
+  ]
+}

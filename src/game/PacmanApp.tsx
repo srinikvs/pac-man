@@ -119,17 +119,19 @@ export function PacmanApp() {
   const inPlay = !showTitle;
 
   return (
-    <div className="cabinet">
-      <header className="cabinet-top">
+    <div className="cabinet" data-testid="cabinet">
+      <header className="cabinet-top" data-testid="hud">
         <div className="brand">
           <h1 className="wordmark">Pac-Man</h1>
-          <p className="ver-id" aria-label={`Version ${VERSION}`}>
+          <p className="ver-id" data-testid="version" aria-label={`Version ${VERSION}`}>
             v{VERSION}
           </p>
         </div>
-        <p className="best-chip" aria-live="polite">
+        <p className="best-chip" data-testid="best" aria-live="polite">
           <span className="best-label">Best</span>
-          <span className="best-value">{formatScore(hud.highScore)}</span>
+          <span className="best-value" data-testid="best-value">
+            {formatScore(hud.highScore)}
+          </span>
         </p>
         <div className="cabinet-actions">
           <IconBtn label={hud.muted ? "Unmute" : "Mute"} onClick={toggleMute}>
@@ -143,12 +145,13 @@ export function PacmanApp() {
         </div>
       </header>
 
-      <div ref={stageRef} className="stage" tabIndex={0}>
+      <div ref={stageRef} className="stage" data-testid="stage" tabIndex={0}>
         <canvas
           ref={canvasRef}
           width={VIEW_W}
           height={VIEW_H}
           className="stage-canvas"
+          data-testid="maze"
         />
 
         {showTitle && <TitleOverlay highScore={hud.highScore} onStart={start} />}
@@ -192,11 +195,11 @@ const HOW_TO = [
 function TitleOverlay({ highScore, onStart }: { highScore: number; onStart: () => void }) {
   const ghosts: GhostId[] = ["blinky", "pinky", "inky", "clyde"];
   return (
-    <div className="overlay overlay-title">
+    <div className="overlay overlay-title" data-testid="overlay">
       <p className="overlay-kicker">Best {formatScore(highScore)}</p>
       <h2 className="overlay-logo">Pac-Man</h2>
       <p className="overlay-tag">Maze chase. One life at a time.</p>
-      <section className="howto" aria-labelledby="howto-title">
+      <section className="howto" data-testid="howto" aria-labelledby="howto-title">
         <h3 id="howto-title" className="howto-title">
           How to play
         </h3>
@@ -217,17 +220,19 @@ function TitleOverlay({ highScore, onStart }: { highScore: number; onStart: () =
           </li>
         ))}
       </ul>
-      <button type="button" className="start-btn" onClick={onStart}>
+      <button type="button" className="start-btn" data-testid="start" onClick={onStart}>
         Start
       </button>
-      <p className="overlay-fine">v{VERSION} · Enter or tap · P pause · M mute</p>
+      <p className="overlay-fine" data-testid="start-version">
+        v{VERSION} · Enter or tap · P pause · M mute
+      </p>
     </div>
   );
 }
 
 function PauseOverlay({ onResume }: { onResume: () => void }) {
   return (
-    <div className="overlay overlay-modal">
+    <div className="overlay overlay-modal" data-testid="pause">
       <div className="modal">
         <p className="modal-kicker">Paused</p>
         <h2 className="modal-title">Take a breath</h2>
@@ -251,13 +256,13 @@ function OverOverlay({
 }) {
   const best = score >= highScore && score > 0;
   return (
-    <div className="overlay overlay-modal">
+    <div className="overlay overlay-modal" data-testid="gameover">
       <div className="modal">
         <p className="modal-kicker">{best ? "New high score" : "Game over"}</p>
         <h2 className="modal-title">{formatScore(score)}</h2>
         <p className="modal-copy">Best {formatScore(highScore)}</p>
         <p className="overlay-fine">v{VERSION}</p>
-        <button type="button" className="start-btn" onClick={onRetry}>
+        <button type="button" className="start-btn" data-testid="retry" onClick={onRetry}>
           Play again
         </button>
       </div>

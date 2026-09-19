@@ -1,0 +1,23 @@
+{
+  "id": "B15",
+  "layer": "e2e",
+  "title": "Hard refresh does not brick Start or steering",
+  "gate": "optional",
+  "steps": [
+    { "op": "openFresh" },
+    { "op": "click", "testId": "start" },
+    { "op": "simTick", "seconds": 2.3 },
+    { "op": "parkGhosts" },
+    { "op": "steer", "dir": "left" },
+    { "op": "waitScoreIncrease", "timeout": 8000 },
+    { "op": "reload" },
+    { "op": "click", "testId": "start" },
+    { "op": "simTick", "seconds": 2.3 },
+    { "op": "parkGhosts" },
+    { "op": "steer", "dir": "right" }
+  ],
+  "expect": [
+    { "assert": "controlsWork" },
+    { "assert": "visible", "testId": "hud" }
+  ]
+}

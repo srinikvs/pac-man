@@ -1,0 +1,17 @@
+{
+  "id": "A5",
+  "layer": "unit",
+  "title": "Life loss / game-over when lives are exhausted",
+  "gate": "optional",
+  "steps": [
+    { "op": "startPlaying" },
+    { "op": "forceDeath", "count": 1 },
+    { "op": "expect", "assert": "lives", "max": 2 },
+    { "op": "expect", "assert": "state", "value": "ready" },
+    { "op": "forceDeath", "count": 3 }
+  ],
+  "expect": [
+    { "assert": "state", "value": "gameover" },
+    { "assert": "lives", "max": -1 }
+  ]
+}

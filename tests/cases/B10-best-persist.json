@@ -1,0 +1,21 @@
+{
+  "id": "B10",
+  "layer": "e2e",
+  "title": "Best updates live and survives reload",
+  "gate": "optional",
+  "steps": [
+    { "op": "openFresh", "best": 5 },
+    { "op": "expect", "assert": "bestValue", "value": 5 },
+    { "op": "click", "testId": "start" },
+    { "op": "simTick", "seconds": 2.3 },
+    { "op": "parkGhosts" },
+    { "op": "setDir", "dir": "left" },
+    { "op": "simTick", "seconds": 1.4 }
+  ],
+  "expect": [
+    { "assert": "scoreAtLeast", "value": 20 },
+    { "assert": "bestAtLeast", "value": 20 },
+    { "assert": "storageBestAtLeast", "value": 20 },
+    { "assert": "bestSurvivesReload" }
+  ]
+}
