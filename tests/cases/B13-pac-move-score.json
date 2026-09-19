@@ -1,0 +1,19 @@
+{
+  "id": "B13",
+  "layer": "e2e",
+  "title": "Pac D-pad/keys move and score increases",
+  "gate": "block",
+  "steps": [
+    { "op": "openFresh" },
+    { "op": "click", "testId": "start" },
+    { "op": "simTick", "seconds": 2.3 },
+    { "op": "parkGhosts" },
+    { "op": "steer", "dir": "left" },
+    { "op": "waitScoreIncrease", "timeout": 8000 }
+  ],
+  "expect": [
+    { "assert": "scoreIncreased" },
+    { "assert": "pacMoved", "min": 0.4 },
+    { "assert": "stateIn", "values": ["playing", "ready", "ghostpause"] }
+  ]
+}

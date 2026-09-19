@@ -1,0 +1,21 @@
+{
+  "id": "A6",
+  "layer": "unit",
+  "title": "Best → localStorage + reload restores high score",
+  "gate": "optional",
+  "steps": [
+    { "op": "writeBest", "value": 10 },
+    { "op": "newSim" },
+    { "op": "expect", "assert": "best", "value": 10 },
+    { "op": "startPlaying" },
+    { "op": "parkGhosts" },
+    { "op": "setDir", "dir": "left" },
+    { "op": "tick", "seconds": 1.4 }
+  ],
+  "expect": [
+    { "assert": "scoreAtLeast", "value": 20 },
+    { "assert": "bestAtLeast", "value": 20 },
+    { "assert": "storageBestAtLeast", "value": 20 },
+    { "assert": "bestMatchesStorage" }
+  ]
+}

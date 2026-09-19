@@ -44,7 +44,8 @@ button:not(:disabled) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  padding: max(12px, var(--sat, env(safe-area-inset-top, 0px))) 16px
+    max(16px, var(--sab, env(safe-area-inset-bottom, 0px)));
   background:
     radial-gradient(1200px 500px at 50% -10%, #16161c 0%, transparent 60%),
     var(--color-bg);
@@ -449,7 +450,13 @@ button:not(:disabled) {
   .stage {
     width: min(
       100%,
-      calc((100dvh - 16rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 224 / 288),
+      calc(
+        (
+            100dvh - 16rem - var(--sat, env(safe-area-inset-top, 0px)) -
+              var(--sab, env(safe-area-inset-bottom, 0px))
+          ) *
+          224 / 288
+      ),
       448px
     );
   }

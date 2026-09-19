@@ -37,6 +37,23 @@ location /pacman/ {
 4. Fruit appears twice per board. Extra life at 10,000.
 5. Pause with **P**, mute with **M**. High score is kept in `localStorage`.
 
+## Test
+
+See [TESTING.md](TESTING.md). Cases live in `tests/cases/*.json` (source of truth).
+
+```bash
+npm test
+npm run test:e2e
+npm run test:e2e:pixel
+```
+
+Local preview default is `http://127.0.0.1:4173/pacman/`. Live smoke:
+
+```bash
+BASE_URL=https://playaddatest.duckdns.org/pacman/ npm run test:e2e
+BASE_URL=https://playadda.duckdns.org/pacman/ npm run test:e2e
+```
+
 ## Stack
 
 - Vite + React 19 + TypeScript

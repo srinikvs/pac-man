@@ -1,0 +1,15 @@
+{
+  "id": "C17",
+  "layer": "pixel",
+  "title": "Pixel: touch D-pad usable — targets not clipped",
+  "gate": "block",
+  "steps": [{ "op": "openFresh" }],
+  "expect": [
+    { "assert": "visible", "testId": "dpad" },
+    { "assert": "dpadTargetsUsable", "minSize": 44 },
+    {
+      "assert": "inViewport",
+      "testId": ["dpad", "dpad-up", "dpad-left", "dpad-right", "dpad-down"]
+    }
+  ]
+}

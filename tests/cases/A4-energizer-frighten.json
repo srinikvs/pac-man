@@ -1,0 +1,22 @@
+{
+  "id": "A4",
+  "layer": "unit",
+  "title": "Energizer → frighten + edible ghosts + score",
+  "gate": "optional",
+  "steps": [
+    { "op": "startPlaying" },
+    { "op": "parkGhosts" },
+    { "op": "eatEnergizer", "x": 1.5, "y": 3.5, "seconds": 0.1 },
+    { "op": "expect", "assert": "scoreAtLeast", "value": 50 },
+    { "op": "expect", "assert": "frightActive" },
+    { "op": "expect", "assert": "ghostEdible", "min": 1 },
+    { "op": "expect", "assert": "powerCleared" },
+    { "op": "placeGhost", "id": "blinky", "phase": "frightened" },
+    { "op": "placeGhost", "id": "blinky", "x": 1.5, "y": 3.5 },
+    { "op": "tick", "seconds": 0.05 }
+  ],
+  "expect": [
+    { "assert": "scoreAtLeast", "value": 250 },
+    { "assert": "ghostPhase", "id": "blinky", "phase": "eyes" }
+  ]
+}

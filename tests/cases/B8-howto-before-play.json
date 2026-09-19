@@ -1,0 +1,17 @@
+{
+  "id": "B8",
+  "layer": "e2e",
+  "title": "First load: how-to-play BEFORE play; Start on the same screen",
+  "gate": "block",
+  "steps": [{ "op": "openFresh" }],
+  "expect": [
+    { "assert": "visible", "testId": "overlay" },
+    { "assert": "visible", "testId": "howto" },
+    { "assert": "count", "testId": "howto", "selector": "li", "value": 3 },
+    { "assert": "visible", "testId": "start" },
+    { "assert": "enabled", "testId": "start" },
+    { "assert": "heading", "name": "How to play" },
+    { "assert": "below", "above": "howto", "below": "start" },
+    { "assert": "count", "testId": "gameover", "value": 0 }
+  ]
+}

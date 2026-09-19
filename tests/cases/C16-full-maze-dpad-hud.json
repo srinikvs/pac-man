@@ -1,0 +1,32 @@
+{
+  "id": "C16",
+  "layer": "pixel",
+  "title": "Pixel: full maze + D-pad/HUD visible; no home-bar clip",
+  "gate": "block",
+  "steps": [
+    { "op": "openFresh" },
+    { "op": "expect", "assert": "viewport", "width": 412, "height": 915 },
+    { "op": "expect", "assert": "visible", "testId": "hud" },
+    { "op": "expect", "assert": "visible", "testId": "maze" },
+    { "op": "expect", "assert": "visible", "testId": "dpad" },
+    { "op": "expect", "assert": "visible", "testId": "start" },
+    {
+      "op": "expect",
+      "assert": "noVerticalClip",
+      "testId": ["hud", "maze", "dpad", "dpad-up", "dpad-left", "dpad-right", "dpad-down"]
+    },
+    { "op": "expect", "assert": "mazeFullyVisible" },
+    { "op": "expect", "assert": "dpadAboveHomeBar", "sab": 0 },
+    { "op": "emulateSafeArea", "sat": 24, "sab": 34 }
+  ],
+  "expect": [
+    { "assert": "viewport", "width": 412, "height": 915 },
+    { "assert": "dpadAboveHomeBar", "sab": 34 },
+    {
+      "assert": "noVerticalClip",
+      "testId": ["hud", "maze", "dpad", "dpad-up", "dpad-left", "dpad-right", "dpad-down"]
+    },
+    { "assert": "mazeFullyVisible" },
+    { "assert": "visible", "testId": "dpad" }
+  ]
+}
